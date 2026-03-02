@@ -49,17 +49,6 @@ export async function handleCommand(client, channel, tags, message) {
       break;
     }
 
-    case 'roulette': {
-      const perdu = Math.random() < 1 / 6;
-      if (perdu) {
-        client.say(channel, `@${username} BOOM 💥 t'as perdu à la roulette russe... timeout 60s !`);
-        client.timeout(channel, username, 60, 'Roulette russe').catch(console.error);
-      } else {
-        client.say(channel, `@${username} *clic* ... t'as survécu ! Cette fois. Kappa`);
-      }
-      break;
-    }
-
     case 'discord':
       client.say(channel, `Rejoins notre Discord ! ${process.env.DISCORD_URL}`);
       break;
