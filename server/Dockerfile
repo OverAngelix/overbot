@@ -2,14 +2,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copie les manifestes en premier pour profiter du cache Docker
 COPY package*.json ./
-RUN npm install --omit=dev
-
-# Copie le code source
+RUN npm install --production
 COPY src/ ./src/
 
-# Utilisateur non-root par sécurité
 USER node
 
 CMD ["node", "src/index.js"]
