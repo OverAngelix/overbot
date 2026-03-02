@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import tmi from 'tmi.js';
-import { handleCommand, shoutout } from './commands/index.js';
+import { handleCommand, shoutout } from './commands.js';
 import { refreshAccessToken, ensureValidToken } from './auth.js';
 import { checkMessage } from './moderation.js';
 

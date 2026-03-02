@@ -1,4 +1,4 @@
-import { getStream, getUser, formatDuration } from '../twitch-api.js';
+import { getStream, getUser, formatDuration } from './twitch-api.js';
 
 /**
  * Gestionnaire principal des commandes du bot
