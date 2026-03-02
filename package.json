@@ -1,0 +1,19 @@
+{
+  "name": "overbot-server",
+  "version": "1.0.0",
+  "description": "Twitch bot server using TMI.js",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "get-token": "node scripts/get-token.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "tmi.js": "^1.8.5"
+  }
+}
