@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copie les manifestes en premier pour profiter du cache Docker
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copie le code source
 COPY src/ ./src/
