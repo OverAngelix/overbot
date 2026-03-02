@@ -1,0 +1,5 @@
+- Connexion avec l'API Twitch pour les token => OK
+- Quelques commandes de tests => OK
+- Refresh la connexion (limité à 4h) => OK
+- Shoutout commande et execution lors d'un raid (>2 viewers) => OK
+- Uptime commande, Live et Hors live => OK
