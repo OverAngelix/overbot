@@ -58,11 +58,12 @@ export async function ensureValidToken() {
 }
 
 async function persistToEnvFile(accessToken, refreshToken) {
-  // Import dynamique pour ne pas charger fs en prod si inutile
-  const { readFileSync, writeFileSync } = await import('fs');
+  const { readFileSync, writeFileSync, existsSync } = await import('fs');
   const { resolve } = await import('path');
 
   const envPath = resolve(process.cwd(), '.env');
+  if (!existsSync(envPath)) return;
+
   let env = readFileSync(envPath, 'utf-8');
   env = setEnvVar(env, 'TWITCH_ACCESS_TOKEN', accessToken);
   if (refreshToken) {
