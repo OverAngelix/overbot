@@ -3,3 +3,8 @@
 - Refresh la connexion (limité à 4h) => OK
 - Shoutout commande et execution lors d'un raid (>2 viewers) => OK
 - Uptime commande, Live et Hors live => OK
+
+- Limite d'utilisation de commande => NOK
+- Solde pour acheter des choses dans un futur jeu => NOK
+- Clips pour faire un clip des 30 dernieres secondes => NOK
+- Alerte pour les nouveaux Sub / followers
