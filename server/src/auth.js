@@ -30,7 +30,8 @@ export async function refreshAccessToken() {
     await persistToEnvFile(data.access_token, data.refresh_token);
   }
 
-  console.log('[auth] Access token rafraîchi avec succès.');
+  const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+  console.log(`[auth] Access token rafraîchi avec succès le ${now}`);
   return data.access_token;
 }
 
