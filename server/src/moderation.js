@@ -11,6 +11,22 @@ const SPAM_DOMAINS = [
   'get-viewers',
 ];
 
+// ✅ NOUVEAU : mots/noms de services suspects détectés même sans URL
+const SPAM_KEYWORDS_STANDALONE = [
+  'stream boo',
+  'streamboo',
+  'streamhub',
+  'stream hub',
+  'viewbotting',
+  'followbot',
+  'twitch follow',
+  'free followers',
+  'free viewers',
+  'get viewers',
+  'buy followers',
+  'buy viewers',
+];
+
 // Regex qui détecte une URL dans un message
 const URL_REGEX = /https?:\/\/[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,}(\/[^\s]*)?/gi;
 
@@ -39,7 +55,14 @@ export function checkMessage(tags, message) {
     }
   }
 
-  // 2. Message contenant une URL + mots-clés suspects → timeout 10 min
+  // ✅ 2. Mention du nom d'un service spam même sans URL → ban immédiat
+  for (const keyword of SPAM_KEYWORDS_STANDALONE) {
+    if (lowerMsg.includes(keyword)) {
+      return { action: 'ban', reason: `Spam bot détecté (service mentionné : ${keyword})` };
+    }
+  }
+
+  // 3. Message contenant une URL + mots-clés suspects → timeout 10 min
   const SUSPICIOUS_KEYWORDS = [
     'free viewer', 'free follower', 'boost your stream',
     'buy viewer', 'buy follower', 'grow your channel',
