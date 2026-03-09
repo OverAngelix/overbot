@@ -11,7 +11,7 @@ const SPAM_DOMAINS = [
   'get-viewers',
 ];
 
-// ✅ NOUVEAU : mots/noms de services suspects détectés même sans URL
+// Mots/noms de services suspects détectés même sans URL
 const SPAM_KEYWORDS_STANDALONE = [
   'stream boo',
   'streamboo',
@@ -31,6 +31,18 @@ const SPAM_KEYWORDS_STANDALONE = [
 const URL_REGEX = /https?:\/\/[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,}(\/[^\s]*)?/gi;
 
 /**
+ * Nettoie un message des caractères Unicode parasites (diacritiques, zero-width, etc.)
+ */
+function sanitize(text) {
+  return text
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u200B-\u200F\u2028-\u202F\uFEFF\u00AD]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Analyse un message et retourne l'action à effectuer, ou null si rien à faire.
  * @returns {{ action: 'ban'|'timeout'|'delete', reason: string, duration?: number } | null}
  */
@@ -42,10 +54,12 @@ export function checkMessage(tags, message) {
   // Ne jamais modérer les mods / broadcaster / VIPs
   if (isMod || isBroadcaster || isVip) return null;
 
-  const lowerMsg = message.toLowerCase();
+  const cleaned = sanitize(message);
+  const lowerMsg = cleaned.toLowerCase();
+  const noSpaceMsg = lowerMsg.replace(/\s/g, '');
 
   // 1. Lien vers un domaine de spam connu → ban immédiat
-  const urls = message.match(URL_REGEX) || [];
+  const urls = cleaned.match(URL_REGEX) || [];
   for (const url of urls) {
     const lowerUrl = url.toLowerCase();
     for (const domain of SPAM_DOMAINS) {
@@ -55,9 +69,11 @@ export function checkMessage(tags, message) {
     }
   }
 
-  // ✅ 2. Mention du nom d'un service spam même sans URL → ban immédiat
+  // 2. Mention du nom d'un service spam même sans URL → ban immédiat
+  //    Vérifie aussi la version sans espaces pour contrer "streamboo .com"
   for (const keyword of SPAM_KEYWORDS_STANDALONE) {
-    if (lowerMsg.includes(keyword)) {
+    const noSpaceKw = keyword.replace(/\s/g, '');
+    if (lowerMsg.includes(keyword) || noSpaceMsg.includes(noSpaceKw)) {
       return { action: 'ban', reason: `Spam bot détecté (service mentionné : ${keyword})` };
     }
   }
@@ -68,6 +84,7 @@ export function checkMessage(tags, message) {
     'buy viewer', 'buy follower', 'grow your channel',
     'check my stream', 'follow me', 'sub4sub', 'follow4follow',
   ];
+
   const hasUrl = urls.length > 0;
   const hasSuspiciousKeyword = SUSPICIOUS_KEYWORDS.some(kw => lowerMsg.includes(kw));
 
