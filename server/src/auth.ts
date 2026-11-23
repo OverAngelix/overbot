@@ -1,21 +1,35 @@
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { requireEnv } from './env.js';
+
 const IS_LOCAL = process.env.NODE_ENV !== 'production';
+
+interface TokenResponse {
+  access_token?: string;
+  refresh_token?: string;
+  expires_in?: number;
+}
+
+interface ValidateResponse {
+  expires_in: number;
+}
 
 // Rafraîchit l'access_token via le refresh_token.
 // En local : persiste aussi dans le .env.
 // En prod  : met uniquement à jour process.env (les env vars sont gérées par la plateforme).
-export async function refreshAccessToken() {
+export async function refreshAccessToken(): Promise<string> {
   const res = await fetch('https://id.twitch.tv/oauth2/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: process.env.TWITCH_CLIENT_ID,
-      client_secret: process.env.TWITCH_CLIENT_SECRET,
+      client_id: requireEnv('TWITCH_CLIENT_ID'),
+      client_secret: requireEnv('TWITCH_CLIENT_SECRET'),
       grant_type: 'refresh_token',
-      refresh_token: process.env.TWITCH_REFRESH_TOKEN,
+      refresh_token: requireEnv('TWITCH_REFRESH_TOKEN'),
     }),
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as TokenResponse;
 
   if (!res.ok || !data.access_token) {
     throw new Error(`Refresh échoué : ${JSON.stringify(data)}`);
@@ -27,7 +41,7 @@ export async function refreshAccessToken() {
   }
 
   if (IS_LOCAL) {
-    await persistToEnvFile(data.access_token, data.refresh_token);
+    persistToEnvFile(data.access_token, data.refresh_token);
   }
 
   const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
@@ -37,7 +51,7 @@ export async function refreshAccessToken() {
 
 // Valide le token courant. Si invalide ou absent, le rafraîchit.
 // À appeler au démarrage du bot.
-export async function ensureValidToken() {
+export async function ensureValidToken(): Promise<void> {
   if (!process.env.TWITCH_ACCESS_TOKEN) {
     console.log('[auth] Pas de token, rafraîchissement initial...');
     await refreshAccessToken();
@@ -52,16 +66,13 @@ export async function ensureValidToken() {
     console.log('[auth] Token expiré, rafraîchissement...');
     await refreshAccessToken();
   } else {
-    const data = await res.json();
+    const data = (await res.json()) as ValidateResponse;
     const minutesLeft = Math.round(data.expires_in / 60);
     console.log(`[auth] Token valide (expire dans ~${minutesLeft} min)`);
   }
 }
 
-async function persistToEnvFile(accessToken, refreshToken) {
-  const { readFileSync, writeFileSync, existsSync } = await import('fs');
-  const { resolve } = await import('path');
-
+function persistToEnvFile(accessToken: string, refreshToken?: string): void {
   const envPath = resolve(process.cwd(), '.env');
   if (!existsSync(envPath)) return;
 
@@ -73,7 +84,7 @@ async function persistToEnvFile(accessToken, refreshToken) {
   writeFileSync(envPath, env);
 }
 
-function setEnvVar(content, key, value) {
+export function setEnvVar(content: string, key: string, value: string): string {
   const regex = new RegExp(`^${key}=.*$`, 'm');
   const line = `${key}=${value}`;
   return regex.test(content) ? content.replace(regex, line) : `${content}\n${line}`;

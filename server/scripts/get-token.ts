@@ -9,15 +9,21 @@
  */
 
 import 'dotenv/config';
-import http from 'http';
-import { exec } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
+import http from 'node:http';
+import { exec } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { setEnvVar } from '../src/auth.js';
+
+interface TokenResponse {
+  access_token?: string;
+  refresh_token?: string;
+}
 
 const CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
 const REDIRECT_URI = process.env.TWITCH_REDIRECT_URI || 'http://localhost:3000/auth/callback';
-const PORT = new URL(REDIRECT_URI).port || 3000;
+const PORT = Number(new URL(REDIRECT_URI).port) || 3000;
 
 const SCOPES = [
   'chat:read',
@@ -40,7 +46,7 @@ const authUrl =
   `&scope=${encodeURIComponent(SCOPES)}`;
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://localhost:${PORT}`);
+  const url = new URL(req.url ?? '/', `http://localhost:${PORT}`);
 
   if (url.pathname !== '/auth/callback') {
     res.writeHead(404);
@@ -63,15 +69,15 @@ const server = http.createServer(async (req, res) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
+      client_id: CLIENT_ID!,
+      client_secret: CLIENT_SECRET!,
       code,
       grant_type: 'authorization_code',
       redirect_uri: REDIRECT_URI,
     }),
   });
 
-  const data = await tokenRes.json();
+  const data = (await tokenRes.json()) as TokenResponse;
 
   if (!tokenRes.ok || !data.access_token) {
     res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -85,7 +91,9 @@ const server = http.createServer(async (req, res) => {
   let envContent = readFileSync(envPath, 'utf-8');
 
   envContent = setEnvVar(envContent, 'TWITCH_ACCESS_TOKEN', data.access_token);
-  envContent = setEnvVar(envContent, 'TWITCH_REFRESH_TOKEN', data.refresh_token);
+  if (data.refresh_token) {
+    envContent = setEnvVar(envContent, 'TWITCH_REFRESH_TOKEN', data.refresh_token);
+  }
 
   writeFileSync(envPath, envContent);
 
@@ -101,15 +109,6 @@ const server = http.createServer(async (req, res) => {
   server.close();
   process.exit(0);
 });
-
-/**
- * Met à jour ou ajoute une variable dans un fichier .env
- */
-function setEnvVar(content, key, value) {
-  const regex = new RegExp(`^${key}=.*$`, 'm');
-  const line = `${key}=${value}`;
-  return regex.test(content) ? content.replace(regex, line) : `${content}\n${line}`;
-}
 
 server.listen(PORT, () => {
   console.log(`\n🔐 Ouverture du navigateur pour autoriser le bot Twitch...`);

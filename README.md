@@ -1,6 +1,6 @@
 # Overbot — Bot Twitch
 
-Bot Twitch personnel basé sur [TMI.js](https://tmijs.com/) et Node.js 20.
+Bot Twitch personnel basé sur [TMI.js](https://tmijs.com/), écrit en TypeScript (Node.js 20).
 
 ---
 
@@ -49,8 +49,10 @@ Le script ouvre ton navigateur sur la page d'autorisation Twitch, puis écrit au
 ## Lancement
 
 ```bash
-npm run dev    # développement (rechargement auto)
-npm start      # production
+npm run dev        # développement (tsx, rechargement auto)
+npm run build      # compile le TypeScript dans dist/
+npm start          # production (lance dist/index.js)
+npm run typecheck  # vérification des types (src + scripts)
 ```
 
 ---
@@ -79,7 +81,7 @@ Le bot analyse chaque message en temps réel.
 
 Les **mods**, **VIPs** et le **broadcaster** ne sont jamais concernés.
 
-Pour ajouter des domaines ou mots-clés, édite `src/moderation.js` :
+Pour ajouter des domaines ou mots-clés, édite `src/moderation.ts` :
 - `SPAM_DOMAINS` → ban immédiat
 - `SUSPICIOUS_KEYWORDS` → timeout 10 min
 
@@ -89,8 +91,8 @@ Pour ajouter des domaines ou mots-clés, édite `src/moderation.js` :
 
 Quand le channel reçoit un raid avec **2 viewers ou plus**, le bot déclenche automatiquement un `!so` vers le raideur.
 
-Le seuil est configurable dans `src/index.js` :
-```js
+Le seuil est configurable dans `src/index.ts` :
+```ts
 if (viewers >= 2) { ... }
 ```
 
@@ -112,14 +114,16 @@ Au démarrage, le bot vérifie aussi la validité du token et le rafraîchit si 
 ```
 server/
 ├── src/
-│   ├── index.js          # Point d'entrée, connexion TMI, events
-│   ├── auth.js           # Gestion OAuth (refresh, validation)
-│   ├── twitch-api.js     # Appels à l'API Helix (stream, user)
-│   ├── moderation.js     # Détection spam et actions
-│   └── commands/
-│       └── index.js      # Gestionnaire de commandes
+│   ├── index.ts          # Point d'entrée, connexion TMI, events
+│   ├── auth.ts           # Gestion OAuth (refresh, validation)
+│   ├── env.ts            # Lecture des variables d'environnement obligatoires
+│   ├── twitch-api.ts     # Appels à l'API Helix (stream, user)
+│   ├── moderation.ts     # Détection spam et actions
+│   └── commands.ts       # Gestionnaire de commandes
 ├── scripts/
-│   └── get-token.js      # Génération du token OAuth
+│   └── get-token.ts      # Génération du token OAuth
+├── dist/                 # JS compilé (généré par npm run build, non versionné)
+├── tsconfig.json
 ├── .env.example
 └── package.json
 ```

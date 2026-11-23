@@ -3,22 +3,23 @@ import tmi from 'tmi.js';
 import { handleCommand, shoutout } from './commands.js';
 import { refreshAccessToken, ensureValidToken } from './auth.js';
 import { checkMessage } from './moderation.js';
+import { requireEnv } from './env.js';
 
 // Rafraîchit le token toutes les 3h30 (token valide 4h)
 const REFRESH_INTERVAL_MS = 3.5 * 60 * 60 * 1000;
 
-function createClient() {
+function createClient(): tmi.Client {
   return new tmi.Client({
     options: { debug: true },
     identity: {
-      username: process.env.TWITCH_BOT_USERNAME,
-      password: `oauth:${process.env.TWITCH_ACCESS_TOKEN}`,
+      username: requireEnv('TWITCH_BOT_USERNAME'),
+      password: `oauth:${requireEnv('TWITCH_ACCESS_TOKEN')}`,
     },
-    channels: [process.env.TWITCH_CHANNEL],
+    channels: [requireEnv('TWITCH_CHANNEL')],
   });
 }
 
-function registerListeners(client) {
+function registerListeners(client: tmi.Client): void {
   client.on('connected', (addr, port) => {
     console.log(`Bot connecté à ${addr}:${port}`);
     console.log(`Channel rejoint : #${process.env.TWITCH_CHANNEL}`);
@@ -27,7 +28,7 @@ function registerListeners(client) {
   client.on('message', (channel, tags, message, self) => {
     if (self) return;
 
-    const username = tags['display-name'];
+    const username = tags['display-name'] ?? tags.username ?? '';
 
     // Modération en priorité
     const mod = checkMessage(tags, message);
@@ -38,14 +39,14 @@ function registerListeners(client) {
       } else if (mod.action === 'timeout') {
         console.log(`[mod] Timeout ${username} (${mod.duration}s) — ${mod.reason}`);
         client.timeout(channel, username, mod.duration, mod.reason).catch(console.error);
-      } else if (mod.action === 'delete') {
+      } else if (mod.action === 'delete' && tags.id) {
         client.deletemessage(channel, tags.id).catch(console.error);
       }
       return; // Ne pas traiter les commandes d'un spammer
     }
 
     if (message.startsWith('!')) {
-      handleCommand(client, channel, tags, message);
+      handleCommand(client, channel, tags, message).catch(console.error);
     }
   });
 
@@ -61,7 +62,7 @@ function registerListeners(client) {
   });
 }
 
-async function start() {
+async function start(): Promise<void> {
   await ensureValidToken();
   let client = createClient();
   registerListeners(client);
@@ -77,7 +78,8 @@ async function start() {
       registerListeners(client);
       await client.connect();
     } catch (err) {
-      console.error('[auth] Échec du refresh, le bot reste connecté avec l\'ancien token :', err.message);
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[auth] Échec du refresh, le bot reste connecté avec l\'ancien token :', message);
     }
   }, REFRESH_INTERVAL_MS);
 }

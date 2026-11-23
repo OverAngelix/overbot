@@ -3,17 +3,25 @@
   "version": "1.0.0",
   "description": "Twitch bot server using TMI.js",
   "type": "module",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "get-token": "node scripts/get-token.js"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.scripts.json",
+    "get-token": "tsx scripts/get-token.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "tmi.js": "^1.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/tmi.js": "^1.8.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }
