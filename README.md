@@ -31,6 +31,9 @@ cp .env.example .env
 | `TWITCH_ACCESS_TOKEN` | Rempli automatiquement par `npm run get-token` |
 | `TWITCH_REFRESH_TOKEN` | Rempli automatiquement par `npm run get-token` |
 | `DISCORD_URL` | Lien de ton serveur Discord |
+| `YOUTUBE_CHANNEL_ID` | *(optionnel)* ID de ta chaîne YouTube (`UC…`), pour les annonces Discord |
+| `DISCORD_WEBHOOK_URL` | *(optionnel)* URL du webhook du salon Discord où annoncer les vidéos |
+| `YOUTUBE_DISCORD_MESSAGE` | *(optionnel)* Message d'annonce, `{title}` et `{url}` sont remplacés |
 
 ---
 
@@ -113,6 +116,20 @@ Lors d'un gift groupé, seul le message global est posté (pas un message par de
 
 ---
 
+## Annonces YouTube sur Discord
+
+Toutes les **10 minutes**, le bot lit le flux RSS public de la chaîne YouTube (`YOUTUBE_CHANNEL_ID`) et poste chaque nouvelle vidéo dans un salon Discord via un webhook (`DISCORD_WEBHOOK_URL`). Fichier : `src/youtube.ts`.
+
+- **Webhook** : sur Discord, *Modifier le salon > Intégrations > Webhooks > Nouveau webhook*, puis *Copier l'URL du webhook*.
+- **ID de chaîne** : YouTube Studio > *Paramètres > Chaîne > Paramètres avancés* (commence par `UC`).
+- **Message** : par défaut juste le lien de la vidéo (Discord affiche l'aperçu avec le titre et la miniature). Personnalisable avec `YOUTUBE_DISCORD_MESSAGE`, par ex. `@everyone Nouvelle VOD : {title} {url}`.
+
+Au démarrage, les vidéos déjà en ligne sont mémorisées sans être annoncées, pour éviter les doublons. Conséquence : une vidéo publiée pendant que le bot est éteint ne sera pas annoncée.
+
+Si une des deux variables est absente, la fonctionnalité est simplement désactivée.
+
+---
+
 ## Refresh du token
 
 Le token OAuth Twitch expire après **4 heures**. Le bot le rafraîchit automatiquement toutes les **3h30** sans interruption.
@@ -135,6 +152,7 @@ server/
 │   ├── twitch-api.ts     # Appels à l'API Helix (stream, user)
 │   ├── moderation.ts     # Détection spam et actions
 │   ├── subs.ts           # Alertes subs / resubs / gifts
+│   ├── youtube.ts        # Annonces Discord des nouvelles vidéos YouTube
 │   └── commands.ts       # Gestionnaire de commandes
 ├── scripts/
 │   └── get-token.ts      # Génération du token OAuth

@@ -5,6 +5,7 @@ import { refreshAccessToken, ensureValidToken } from './auth.js';
 import { checkMessage } from './moderation.js';
 import { requireEnv } from './env.js';
 import { registerSubAlerts } from './subs.js';
+import { startYoutubeWatcher } from './youtube.js';
 
 // Rafraîchit le token toutes les 3h30 (token valide 4h)
 const REFRESH_INTERVAL_MS = 3.5 * 60 * 60 * 1000;
@@ -70,6 +71,9 @@ async function start(): Promise<void> {
   let client = createClient();
   registerListeners(client);
   await client.connect();
+
+  // Annonces Discord des nouvelles vidéos YouTube (indépendant de la connexion Twitch)
+  startYoutubeWatcher();
 
   // Refresh automatique du token avant expiration
   setInterval(async () => {
