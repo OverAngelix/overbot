@@ -1,6 +1,6 @@
 # Overbot — Bot Twitch
 
-Bot Twitch personnel basé sur [TMI.js](https://tmijs.com/), écrit en TypeScript (Node.js 20).
+Bot Twitch personnel basé sur [TMI.js](https://tmijs.com/), écrit en TypeScript (Node.js 24).
 
 ---
 
