@@ -61,7 +61,7 @@ export async function handleCommand(
 
     case 'commandes':
     case 'commands':
-      await client.say(channel, `Commandes disponibles : !ping, !bonjour, !uptime, !discord, !so, !roulette, !commandes`);
+      await client.say(channel, `Commandes disponibles : !ping, !bonjour, !uptime, !discord, !so, !commandes`);
       break;
 
     default:

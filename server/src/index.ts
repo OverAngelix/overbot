@@ -4,6 +4,7 @@ import { handleCommand, shoutout } from './commands.js';
 import { refreshAccessToken, ensureValidToken } from './auth.js';
 import { checkMessage } from './moderation.js';
 import { requireEnv } from './env.js';
+import { registerSubAlerts } from './subs.js';
 
 // Rafraîchit le token toutes les 3h30 (token valide 4h)
 const REFRESH_INTERVAL_MS = 3.5 * 60 * 60 * 1000;
@@ -56,6 +57,8 @@ function registerListeners(client: tmi.Client): void {
       shoutout(client, channel, raidingUser).catch(console.error);
     }
   });
+
+  registerSubAlerts(client);
 
   client.on('disconnected', (reason) => {
     console.log(`Bot déconnecté : ${reason}`);

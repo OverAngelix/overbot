@@ -98,6 +98,21 @@ if (viewers >= 2) { ... }
 
 ---
 
+## Alertes subs
+
+Le bot remercie automatiquement dans le chat (fichier `src/subs.ts`) :
+
+| Événement | Exemple de message |
+|---|---|
+| Nouveau sub | `Merci @Pseudo pour le sub ! <3` |
+| Resub | `Merci @Pseudo pour le resub — 12 mois ! <3` |
+| Gift de plusieurs subs | `@Pseudo offre 5 subs à la commu ! Merci énormément <3` |
+| Gift à une personne | `@Pseudo offre un sub à @Destinataire ! Merci <3` |
+
+Lors d'un gift groupé, seul le message global est posté (pas un message par destinataire).
+
+---
+
 ## Refresh du token
 
 Le token OAuth Twitch expire après **4 heures**. Le bot le rafraîchit automatiquement toutes les **3h30** sans interruption.
@@ -119,6 +134,7 @@ server/
 │   ├── env.ts            # Lecture des variables d'environnement obligatoires
 │   ├── twitch-api.ts     # Appels à l'API Helix (stream, user)
 │   ├── moderation.ts     # Détection spam et actions
+│   ├── subs.ts           # Alertes subs / resubs / gifts
 │   └── commands.ts       # Gestionnaire de commandes
 ├── scripts/
 │   └── get-token.ts      # Génération du token OAuth
