@@ -31,16 +31,18 @@ function registerListeners(client: tmi.Client): void {
     if (self) return;
 
     const username = tags['display-name'] ?? tags.username ?? '';
+    // Ban/timeout : toujours le login (le display-name peut être localisé, ex. caractères CJK)
+    const login = tags.username ?? '';
 
     // Modération en priorité
     const mod = checkMessage(tags, message);
     if (mod) {
-      if (mod.action === 'ban') {
+      if (mod.action === 'ban' && login) {
         console.log(`[mod] Ban de ${username} — ${mod.reason}`);
-        client.ban(channel, username, mod.reason).catch(console.error);
-      } else if (mod.action === 'timeout') {
+        client.ban(channel, login, mod.reason).catch(console.error);
+      } else if (mod.action === 'timeout' && login) {
         console.log(`[mod] Timeout ${username} (${mod.duration}s) — ${mod.reason}`);
-        client.timeout(channel, username, mod.duration, mod.reason).catch(console.error);
+        client.timeout(channel, login, mod.duration, mod.reason).catch(console.error);
       } else if (mod.action === 'delete' && tags.id) {
         client.deletemessage(channel, tags.id).catch(console.error);
       }
