@@ -16,8 +16,6 @@ export async function handleCommand(
   const isMod = tags.mod || tags['user-type'] === 'mod';
   const isBroadcaster = tags.badges?.broadcaster === '1';
 
-  console.log(`Commande reçue : !${command} de ${username}`);
-
   switch (command) {
     case 'ping':
       await client.say(channel, `Pong ! @${username}`);

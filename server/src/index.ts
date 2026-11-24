@@ -12,7 +12,8 @@ const REFRESH_INTERVAL_MS = 3.5 * 60 * 60 * 1000;
 
 function createClient(): tmi.Client {
   return new tmi.Client({
-    options: { debug: true },
+    // debug: false → tmi.js ne logue que ses erreurs (pas les messages du chat)
+    options: { debug: false },
     identity: {
       username: requireEnv('TWITCH_BOT_USERNAME'),
       password: `oauth:${requireEnv('TWITCH_ACCESS_TOKEN')}`,
