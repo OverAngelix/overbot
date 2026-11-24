@@ -15,10 +15,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build backend Docker image
-        run: docker build -t registry.fmaret.duckdns.org/overbot:latest ./server
+        run: docker build -t ${{ secrets.REGISTRY_URL }}/overbot:latest ./server
 
       - name: Login to private registry
-        run: echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.fmaret.duckdns.org -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+        run: echo ${{ secrets.REGISTRY_PASSWORD }} | docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
 
       - name: Push Docker image backend
-        run: docker push registry.fmaret.duckdns.org/overbot:latest
+        run: docker push ${{ secrets.REGISTRY_URL }}/overbot:latest
